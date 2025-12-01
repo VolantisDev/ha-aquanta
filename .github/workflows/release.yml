@@ -35,6 +35,6 @@ jobs:
           zip aquanta.zip -r ./
 
       - name: "Upload the ZIP file to the release"
-        uses: softprops/action-gh-release@v2.0.4
+        uses: softprops/action-gh-release@v2.5.0
         with:
           files: ${{ github.workspace }}/custom_components/aquanta/aquanta.zip
