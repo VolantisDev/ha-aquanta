@@ -9,7 +9,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant import data_entry_flow
-from homeassistant.components.dhcp import DhcpServiceInfo
+from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
