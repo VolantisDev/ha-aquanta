@@ -30,7 +30,7 @@ ENTITY_DESCRIPTIONS = (
         "native_value": lambda entity: entity.coordinator.data["devices"][
             entity.aquanta_id
         ]["water"]["temperature"],
-        "suggested_precision": None,
+        "suggested_precision": 0,
         "options": None,
     },
     {
@@ -49,7 +49,7 @@ ENTITY_DESCRIPTIONS = (
             "thermostatEnabled"
         ]
         else None,
-        "suggested_precision": None,
+        "suggested_precision": 0,
         "options": None,
     },
     {
@@ -64,7 +64,7 @@ ENTITY_DESCRIPTIONS = (
             entity.coordinator.data["devices"][entity.aquanta_id]["water"]["available"]
             * 100
         ),
-        "suggested_precision": 1,
+        "suggested_precision": 0,
         "options": None,
     },
     {
