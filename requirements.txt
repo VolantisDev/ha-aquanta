@@ -1,4 +1,4 @@
-colorlog==6.8.2
+colorlog==6.10.1
 homeassistant>=2024.0.0
 ruff==0.3.7
 aquanta==0.2
