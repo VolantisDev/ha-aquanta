@@ -2,6 +2,7 @@
   "config": {
     "step": {
       "user": {
+        "description": "If you need help with the configuration have a look here: https://github.com/bmcclure/ha-aquanta",
         "data": {
           "username": "[%key:common::config_flow::data::username%]",
           "password": "[%key:common::config_flow::data::password%]"
@@ -9,17 +10,32 @@
       },
       "reauth_confirm": {
         "title": "[%key:common::config_flow::title::reauth%]",
-        "description": "The Aquanta integration needs to re-authenticate your account"
+        "description": "The Aquanta integration needs to re-authenticate your account",
+        "data": {
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]"
+        }
       }
     },
     "error": {
-      "connection": "[%key:common::config_flow::error::connection%]",
-      "auth": "[%key:common::config_flow::error::auth%]",
+      "connection": "Unable to connect to the server.",
+      "auth": "Username/Password is wrong.",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Aquanta options",
+        "description": "Configure how the integration behaves.",
+        "data": {
+          "away_days": "Away duration in days (0 = until turned off)"
+        }
+      }
     }
   }
 }

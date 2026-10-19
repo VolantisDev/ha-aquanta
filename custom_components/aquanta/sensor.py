@@ -17,6 +17,59 @@ from .entity import AquantaEntity
 from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
+MODE_OPTIONS = [
+    "away",
+    "boost",
+    "intelligence",
+    "off",
+    "setpoint",
+    "thermostat",
+    "timer",
+    "tou",
+]
+
+
+def _device(entity):
+    return entity.coordinator.data["devices"].get(entity.aquanta_id) or {}
+
+
+def _water(entity):
+    return _device(entity).get("water") or {}
+
+
+def _advanced(entity):
+    return _device(entity).get("advanced") or {}
+
+
+def _info(entity):
+    return _device(entity).get("info") or {}
+
+
+def _temperature(entity):
+    return _water(entity).get("temperature")
+
+
+def _set_point(entity):
+    adv = _advanced(entity)
+    return adv.get("setPoint") if adv.get("thermostatEnabled") else None
+
+
+def _hot_water_available(entity):
+    available = _water(entity).get("available")
+    if available is None:
+        return None
+    try:
+        return float(available) * 100
+    except (TypeError, ValueError):
+        return None
+
+
+def _current_mode(entity):
+    mode = (_info(entity).get("currentMode") or {}).get("type")
+    # Returning an unknown value to an ENUM sensor logs an error, so map it to None.
+    return mode if mode in MODE_OPTIONS else None
+
+
 ENTITY_DESCRIPTIONS = (
     {
         "desc": SensorEntityDescription(
@@ -27,9 +80,7 @@ ENTITY_DESCRIPTIONS = (
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             icon="mdi:water-thermometer",
         ),
-        "native_value": lambda entity: entity.coordinator.data["devices"][
-            entity.aquanta_id
-        ]["water"]["temperature"],
+        "native_value": _temperature,
         "suggested_precision": 0,
         "options": None,
     },
@@ -42,13 +93,7 @@ ENTITY_DESCRIPTIONS = (
             native_unit_of_measurement=UnitOfTemperature.CELSIUS,
             icon="mdi:thermometer-water",
         ),
-        "native_value": lambda entity: entity.coordinator.data["devices"][
-            entity.aquanta_id
-        ]["advanced"]["setPoint"]
-        if entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-            "thermostatEnabled"
-        ]
-        else None,
+        "native_value": _set_point,
         "suggested_precision": 0,
         "options": None,
     },
@@ -60,10 +105,7 @@ ENTITY_DESCRIPTIONS = (
             native_unit_of_measurement=PERCENTAGE,
             icon="mdi:water-percent",
         ),
-        "native_value": lambda entity: (
-            entity.coordinator.data["devices"][entity.aquanta_id]["water"]["available"]
-            * 100
-        ),
+        "native_value": _hot_water_available,
         "suggested_precision": 0,
         "options": None,
     },
@@ -74,18 +116,9 @@ ENTITY_DESCRIPTIONS = (
             device_class=SensorDeviceClass.ENUM,
             icon="mdi:water-sync",
         ),
-        "native_value": lambda entity: entity.coordinator.data["devices"][
-            entity.aquanta_id
-        ]["info"]["currentMode"]["type"],
+        "native_value": _current_mode,
         "suggested_precision": None,
-        "options": [
-            "away",
-            "boost",
-            "intelligence",
-            "off",
-            "setpoint",
-            "timer",
-        ],
+        "options": MODE_OPTIONS,
     },
 )
 
@@ -121,7 +154,6 @@ class AquantaSensor(AquantaEntity, SensorEntity):
     """Represents a sensor for an Aquanta water heater controller."""
 
     _attr_has_entity_name = True
-    _attr_should_poll = True
 
     def __init__(
         self,
@@ -134,7 +166,7 @@ class AquantaSensor(AquantaEntity, SensorEntity):
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator, aquanta_id)
-        self.entity_description: entity_description
+        self.entity_description = entity_description
         self._attr_name = entity_description.name
         self._native_value_func = native_value_func
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key

@@ -1,4 +1,5 @@
 """Test aquanta config flow."""
+
 from unittest.mock import patch
 
 from homeassistant import config_entries, data_entry_flow
@@ -14,11 +15,8 @@ from .const import MOCK_CONFIG
 # actual functionality of the integration in other test modules.
 @pytest.fixture(autouse=True)
 def bypass_setup_fixture():
-    """Prevent setup."""
+    """Prevent setup (the integration defines only async_setup_entry)."""
     with patch(
-        "custom_components.aquanta.async_setup",
-        return_value=True,
-    ), patch(
         "custom_components.aquanta.async_setup_entry",
         return_value=True,
     ):

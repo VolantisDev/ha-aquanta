@@ -15,6 +15,25 @@ from .entity import AquantaEntity
 from .const import DOMAIN, LOGGER
 from .coordinator import AquantaCoordinator
 
+
+def _advanced(entity):
+    device = entity.coordinator.data["devices"].get(entity.aquanta_id) or {}
+    adv = device.get("advanced")
+    return adv if isinstance(adv, dict) else {}
+
+
+def _control_enabled(entity):
+    adv = _advanced(entity)
+    return None if not adv else bool(adv.get("controlEnabled"))
+
+
+def _flag(entity, flag):
+    adv = _advanced(entity)
+    if not adv:
+        return None  # no data -> unknown, not off
+    return bool(adv.get("controlEnabled") and adv.get(flag))
+
+
 ENTITY_DESCRIPTIONS = (
     {
         "desc": BinarySensorEntityDescription(
@@ -22,9 +41,7 @@ ENTITY_DESCRIPTIONS = (
             name="Control enabled",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        "is_on": lambda entity: entity.coordinator.data["devices"][entity.aquanta_id][
-            "advanced"
-        ]["controlEnabled"],
+        "is_on": _control_enabled,
     },
     {
         "desc": BinarySensorEntityDescription(
@@ -32,14 +49,7 @@ ENTITY_DESCRIPTIONS = (
             name="Intelligence enabled",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        "is_on": lambda entity: (
-            entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "controlEnabled"
-            ]
-            and entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "intelEnabled"
-            ]
-        ),
+        "is_on": lambda entity: _flag(entity, "intelEnabled"),
     },
     {
         "desc": BinarySensorEntityDescription(
@@ -47,14 +57,7 @@ ENTITY_DESCRIPTIONS = (
             name="Thermostat enabled",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        "is_on": lambda entity: (
-            entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "controlEnabled"
-            ]
-            and entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "thermostatEnabled"
-            ]
-        ),
+        "is_on": lambda entity: _flag(entity, "thermostatEnabled"),
     },
     {
         "desc": BinarySensorEntityDescription(
@@ -62,14 +65,7 @@ ENTITY_DESCRIPTIONS = (
             name="Time-of-use enabled",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        "is_on": lambda entity: (
-            entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "controlEnabled"
-            ]
-            and entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "touEnabled"
-            ]
-        ),
+        "is_on": lambda entity: _flag(entity, "touEnabled"),
     },
     {
         "desc": BinarySensorEntityDescription(
@@ -77,14 +73,7 @@ ENTITY_DESCRIPTIONS = (
             name="Timer enabled",
             entity_category=EntityCategory.DIAGNOSTIC,
         ),
-        "is_on": lambda entity: (
-            entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "controlEnabled"
-            ]
-            and entity.coordinator.data["devices"][entity.aquanta_id]["advanced"][
-                "timerEnabled"
-            ]
-        ),
+        "is_on": lambda entity: _flag(entity, "timerEnabled"),
     },
 )
 
@@ -127,7 +116,6 @@ class AquantaBinarySensor(AquantaEntity, BinarySensorEntity):
         self.entity_description = entity_description
         self._is_on_func = is_on_func
         self._attr_name = entity_description.name
-        self._attr_should_poll = True
         self._attr_unique_id = self._base_unique_id + "_" + entity_description.key
         LOGGER.debug("Created binary sensor with unique ID %s", self._attr_unique_id)
 

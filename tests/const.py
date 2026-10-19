@@ -1,4 +1,5 @@
 """Constants for integration_blueprint tests."""
+
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 
 # Mock config data to be used across multiple tests

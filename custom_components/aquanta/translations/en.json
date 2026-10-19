@@ -1,7 +1,8 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Device is already configured"
+            "already_configured": "Device is already configured",
+            "reauth_successful": "Re-authentication was successful"
         },
         "error": {
             "auth": "Username/Password is wrong.",
@@ -14,6 +15,25 @@
                 "data": {
                     "username": "Email address",
                     "password": "Password"
+                }
+            },
+            "reauth_confirm": {
+                "title": "Reauthenticate Aquanta",
+                "description": "The Aquanta integration needs to re-authenticate your account",
+                "data": {
+                    "username": "Email address",
+                    "password": "Password"
+                }
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Aquanta options",
+                "description": "Configure how the integration behaves.",
+                "data": {
+                    "away_days": "Away duration in days (0 = until turned off)"
                 }
             }
         }
